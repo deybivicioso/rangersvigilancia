@@ -33,7 +33,9 @@ dependencies:
   sqflite: any
   path: any
   sqflite_common_ffi: any
-  sqlite3_flutter_libs: 0.5.26
+  sqlite3_flutter_libs: 0.5.26  
+  flutter_sound: any
+  permission_handler: any
 
 
 

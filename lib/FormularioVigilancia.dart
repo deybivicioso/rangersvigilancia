@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:rangersvigilancia/databasehelper.dart';
-//import 'DatabaseHelper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_sound/flutter_sound.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 
 class FormularioVigilancia extends StatefulWidget {
@@ -16,9 +17,31 @@ class _FormularioVigilanciaState extends State<FormularioVigilancia> {
   TextEditingController _descripcionController = TextEditingController();
 
   final DatabaseHelper _databaseHelper = DatabaseHelper();
+  final FlutterSoundRecorder _recorder = FlutterSoundRecorder();
 
   File? _foto;
   File? _audio;
+  bool _isRecording = false;
+  String? _audioPath;
+
+  @override
+  void initState() {
+    super.initState();
+    _initRecorder();
+  }
+
+  @override
+  void dispose() {
+    _recorder.closeRecorder();
+    super.dispose();
+  }
+
+  // Inicializar el grabador y solicitar permisos
+  Future<void> _initRecorder() async {
+    await Permission.microphone.request();
+    await Permission.storage.request();
+    await _recorder.openRecorder();
+  }
 
   // Método para seleccionar una imagen desde la galería
   Future<void> _seleccionarImagen() async {
@@ -32,31 +55,44 @@ class _FormularioVigilanciaState extends State<FormularioVigilancia> {
     }
   }
 
-  // Método para grabar audio (implementación simplificada)
-  Future<void> _grabarAudio() async {
-    // Aquí puedes agregar la lógica para grabar audio usando un paquete como 'flutter_sound'
-    // Por simplicidad, solo mostramos un mensaje en este ejemplo
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Funcionalidad de grabar audio aún no implementada')),
-    );
+  // Método para grabar o detener el audio
+  Future<void> _toggleRecording() async {
+    if (_isRecording) {
+      final path = await _recorder.stopRecorder();
+      setState(() {
+        _isRecording = false;
+        _audioPath = path;
+        _audio = File(path!);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Grabación detenida')),
+      );
+    } else {
+      await _recorder.startRecorder(
+        toFile: 'audio_record.aac',
+        codec: Codec.aacADTS,
+      );
+      setState(() {
+        _isRecording = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Grabando audio...')),
+      );
+    }
   }
 
   // Método para guardar los datos en la base de datos
   void _guardarDatos() async {
     if (_formKey.currentState!.validate()) {
-      // Inicializa la base de datos
       await _databaseHelper.database;
 
-      // Obtiene los datos del formulario
       final titulo = _tituloController.text;
       final fecha = _fechaController.text;
       final descripcion = _descripcionController.text;
 
-      // Convierte la imagen y el audio a bytes
       final fotoBytes = _foto != null ? await _foto!.readAsBytes() : null;
       final audioBytes = _audio != null ? await _audio!.readAsBytes() : null;
 
-      // Crea un mapa con los datos para insertar en la base de datos
       Map<String, dynamic> vigilancia = {
         'titulo': titulo,
         'fecha': fecha,
@@ -65,21 +101,19 @@ class _FormularioVigilanciaState extends State<FormularioVigilancia> {
         'audio': audioBytes,
       };
 
-      // Inserta los datos en la base de datos
       await _databaseHelper.insertVigilancia(vigilancia);
 
-      // Muestra un mensaje al usuario
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Datos guardados correctamente')),
       );
 
-      // Limpia los campos después de guardar
       _tituloController.clear();
       _fechaController.clear();
       _descripcionController.clear();
       setState(() {
         _foto = null;
         _audio = null;
+        _audioPath = null;
       });
     }
   }
@@ -149,8 +183,8 @@ class _FormularioVigilanciaState extends State<FormularioVigilancia> {
               if (_foto != null) Image.file(_foto!, height: 100),
               SizedBox(height: 16),
               ElevatedButton(
-                onPressed: _grabarAudio,
-                child: Text('Grabar Audio'),
+                onPressed: _toggleRecording,
+                child: Text(_isRecording ? 'Detener Grabación' : 'Grabar Audio'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.redAccent,
                 ),
@@ -171,5 +205,6 @@ class _FormularioVigilanciaState extends State<FormularioVigilancia> {
     );
   }
 }
+
 
 
