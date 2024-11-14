@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'FormularioVigilancia.dart'; // Importa la nueva pantalla FormularioVigilancia
 import 'VerEmergenciasPage.dart'; // Importa la pantalla VerEmergenciasPage
-import 'package:sqflite_common_ffi/sqflite_ffi.dart'; // Paquete importante para correr la BBDD
+import 'perfilPolicia.dart'; // Importa la pantalla de perfil
+import 'package:sqflite_common_ffi/sqflite_ffi.dart'; // Paquete para la base de datos
 
 void main() {
   sqfliteFfiInit();
@@ -37,6 +38,7 @@ class HomePage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Título de la aplicación
               Text(
                 "Rangers SPD",
                 style: TextStyle(
@@ -46,13 +48,13 @@ class HomePage extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 40),
+              // Botones principales
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Botón para crear nueva emergencia
+                  // Botón para crear nueva vigilancia
                   ElevatedButton(
                     onPressed: () {
-                      // Navega a la pantalla de creación de vigilancia (FormularioVigilancia)
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => FormularioVigilancia()),
@@ -65,8 +67,8 @@ class HomePage extends StatelessWidget {
                     child: Row(
                       children: [
                         Image.asset(
-                          'assets/crear.png', // Ruta de la imagen
-                          width: 30, // Tamaño de la imagen
+                          'assets/crear.png',
+                          width: 30,
                           height: 30,
                         ),
                         SizedBox(width: 10),
@@ -78,7 +80,6 @@ class HomePage extends StatelessWidget {
                   // Botón para ver emergencias
                   ElevatedButton(
                     onPressed: () {
-                      // Navega a la pantalla de ver emergencias (VerEmergenciasPage)
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => VerEmergenciasPage()),
@@ -91,8 +92,8 @@ class HomePage extends StatelessWidget {
                     child: Row(
                       children: [
                         Image.asset(
-                          'assets/registro.png', // Ruta de la imagen
-                          width: 30, // Tamaño de la imagen
+                          'assets/registro.png',
+                          width: 30,
                           height: 30,
                         ),
                         SizedBox(width: 10),
@@ -101,6 +102,31 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+              SizedBox(height: 20),
+              // Botón para ver el perfil
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MiPerfilScreen()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purpleAccent,
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.person, size: 30, color: Colors.white),
+                    SizedBox(width: 10),
+                    Text(
+                      "Ver mi perfil",
+                      style: TextStyle(fontSize: 18, color: Colors.white),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

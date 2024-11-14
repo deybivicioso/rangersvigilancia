@@ -70,6 +70,7 @@ flutter:
   assets:
    - assets/crear.png
    - assets/registro.png
+   - assets/img0.jpg
    
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
